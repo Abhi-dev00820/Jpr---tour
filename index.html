@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Forever Journey</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;600&display=swap');
+
+        :root {
+            --accent: #ff4757;
+            --glass: rgba(255, 255, 255, 0.9);
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+            background-attachment: fixed;
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* The Frame */
+        #display-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            height: 550px;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            background: #000;
+            border: 12px solid white;
+        }
+
+        .asset {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            transition: transform 0.8s ease-in-out;
+        }
+
+        #info-card {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 20px;
+            transform: translateY(150%);
+            transition: transform 0.6s ease;
+            z-index: 10;
+            text-align: center;
+        }
+
+        #info-card.active { transform: translateY(0); }
+
+        .nav-btn {
+            margin-top: 25px;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: 600;
+        }
+
+        .nav-btn:hover { background: var(--accent); transform: scale(1.05); }
+
+        /* Proposal Special Styles */
+        .proposal-card { background: white !important; border: 3px solid var(--accent); }
+        .proposal-card h2 { font-family: 'Dancing Script', cursive; font-size: 2.8rem; color: var(--accent); margin: 10px 0; }
+        
+        .choice-btns { display: none; gap: 15px; justify-content: center; margin-top: 15px; }
+        .choice-btns.show { display: flex; }
+        
+        .yes-btn { background: var(--accent); color: white; border: none; padding: 10px 30px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .no-btn { background: #eee; color: #777; border: none; padding: 10px 30px; border-radius: 20px; cursor: pointer; }
+
+        .heart { color: var(--accent); display: inline-block; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% {transform: scale(1);} 50% {transform: scale(1.2);} 100% {transform: scale(1);} }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="display-container">
+        <div id="media-wrapper">
+            <img id="main-asset" class="asset" src="images/Airport jpr.jpg">
+        </div>
+
+        <div id="info-card" class="active">
+            <h2 id="loc-title">Welcome to Jaipur ZEN!!!</h2>
+            <p id="loc-desc">I've planned 8 special spots to show you how much this place—and you—mean to me.</p>
+        </div>
+    </div>
+
+    <button class="nav-btn" id="nextBtn" onclick="processNext()">Let's Start the Tour →</button>
+</div>
+
+<script>
+    // THE 8 SPOTS (Add your text and image links here)
+    const locations = [
+        { title: "Spot 1: Amer Fort", desc: "A majestic hilltop fort with stunning palaces, courtyards, and panoramic views, featuring intricate designs and itsLocated high on the Aravalli Hills, this 16th-century fortress is a blend of rugged military defense and opulent artistic interiors..", img: "images/Amer-Fort-Jaipur.jpg" },
+        { title: "Spot 2: Hawa Mahal", desc: "An iconic, five-story pink sandstone facade with numerous windows, built for royal women to observe street life unseen.", img: "images/Hawa mahal jpr" },
+        { title: "Spot 3: Birla Mandir", desc: " (It's a Laxmi Narayan Temple): A stunning white marble temple dedicated to Lord Vishnu and Goddess Lakshmi, offering peace and intricate carvings.", img: "images/birla-temple" },
+        { title: "Spot 4: City Palace", desc: "A complex of courtyards, gardens, and buildings that served as the royal residence, blending Rajasthani and Mughal architecture..", img: "images/city-palace" },
+        { title: "Spot 5: Jal Mahal", desc: " (Water Palace): A beautiful palace seemingly floating in the middle of Man Sagar Lake, especially enchanting at sunset.", img: "images/Jal-Mahal" },
+        { title: "Spot 6: Jantar Mantar", desc: " A UNESCO World Heritage site, this astronomical observatory houses gigantic instruments for measuring time and celestial movements.", img: "images/Jantar mantar" },
+        { title: "Spot 7: Nahargarh fort", desc: "It Offers breathtaking sunset views over the city from its strategic position on the Aravalli Hills.", img: "images/Nhargrah fort" },
+        { title: "Back to Airport", desc: "Back at the airport, where we began. But I have one more thing to say.", img: "images/Airport jpr", isProposal: true }
+    ];
+
+    const cabVideo = "ZEN"; // Replace with your cab video
+    let currentLoc = -1;
+    let isTraveling = false;
+
+    const btn = document.getElementById('nextBtn');
+    const wrapper = document.getElementById('media-wrapper');
+    const infoCard = document.getElementById('info-card');
+
+    function processNext() {
+        if (isTraveling) {
+            showDestination();
+        } else {
+            showCab();
+        }
+    }
+
+    function showCab() {
+        currentLoc++;
+        if (currentLoc >= locations.length) return;
+        
+        isTraveling = true;
+        animateOut();
+
+        setTimeout(() => {
+            wrapper.innerHTML = `<video id="main-asset" class="asset" autoplay muted loop><source src="images/Cab Ride.mp4" type="video/mp4"></video>`;
+            updateText("Traveling...", "Enjoy the view while we head to our next destination.");
+            animateIn();
+            btn.innerText = "We have arrived!";
+        }, 800);
+    }
+
+    function showDestination() {
+        isTraveling = false;
+        const data = locations[currentLoc];
+        animateOut();
+
+        setTimeout(() => {
+            wrapper.innerHTML = `<img id="main-asset" class="asset" src="${data.img}">`;
+            updateText(data.title, data.desc);
+            
+            if(data.isProposal) {
+                infoCard.classList.add('proposal-card');
+                document.getElementById('loc-title').innerHTML = "Do you Like it ?? And am i worthy for U? <span class='heart'>❤️</span>";
+                btn.style.display = 'none';
+                // Show choice buttons (just for fun/interactivity)
+                wrapper.innerHTML += `<div class="choice-btns show" style="position:absolute; bottom:150px; left:0; right:0; z-index:20;">
+                    <button class="yes-btn" onclick="alert('She said YES! ❤️')">YES!</button>
+                    <button class="no-btn" onmouseover="this.style.position='absolute'; this.style.top=Math.random()*80+'%'; this.style.left=Math.random()*80+'%'">No</button>
+                </div>`;
+            }
+
+            animateIn();
+            if(!data.isProposal) btn.innerText = "Go to next spot";
+        }, 800);
+    }
+
+    function animateOut() {
+        const old = document.querySelector('.asset');
+        if(old) old.style.transform = "translateX(-100%)";
+        infoCard.classList.remove('active');
+    }
+
+    function animateIn() {
+        const newAsset = document.getElementById('main-asset');
+        newAsset.style.transform = "translateX(100%)";
+        setTimeout(() => {
+            newAsset.style.transform = "translateX(0%)";
+            infoCard.classList.add('active');
+        }, 50);
+    }
+
+    function updateText(t, d) {
+        document.getElementById('loc-title').innerText = t;
+        document.getElementById('loc-desc').innerText = d;
+    }
+</script>
+
+</body>
+</html>
